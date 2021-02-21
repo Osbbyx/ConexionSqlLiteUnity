@@ -135,3 +135,61 @@ public class ConexDB : MonoBehaviour
     
 }
 ```
+
+<h2>Ahora que entendemos el codigo, le dejo el codigo base organizado</h2>
+<br>
+``` C#
+   string strConexion;
+    string DBFileName = "text.db";
+    public Text myText;
+
+    IDbConnection dbConnection;
+    IDbCommand dbCommand;
+    IDataReader reader;
+
+    void Start()
+    {
+        AbrirDB();
+        ComandoSelect("*","Camisa");
+        LeyendoDatos();
+        CerrarDB();
+    }
+
+    //1- crear y abrir la conexion
+    void AbrirDB()
+    {
+        strConexion = "URI=file:" + Application.dataPath + "/StreamingAssets/" + DBFileName;
+        dbConnection = new SqliteConnection(strConexion);
+        dbConnection.Open();
+    }
+
+    //2- crear la consulta
+    void ComandoSelect(string item, string tabla)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT " + item + " FROM " + tabla;
+        dbCommand.CommandText = sqlQuery; 
+    }
+
+    //3- leer la base de datos
+    void LeyendoDatos()
+    {
+        reader = dbCommand.ExecuteReader();
+        while (reader.Read())
+        {
+            Debug.Log(reader.GetInt32(0) + " -- " + reader.GetString(1) + " -- " + reader.GetString(2) + " -- " + reader.GetInt32(3));
+        }
+    }
+
+    //4-cerrar las conexiones
+    void CerrarDB()
+    {
+        reader.Close();
+        reader = null;
+        dbCommand.Dispose();
+        dbCommand = null;
+        dbConnection.Close();
+        dbConnection = null;
+    }
+```
+
