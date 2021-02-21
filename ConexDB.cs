@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
+using System.Data;
 using Mono.Data.Sqlite;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 
 public class ConexDB : MonoBehaviour
@@ -12,6 +13,7 @@ public class ConexDB : MonoBehaviour
     string rutaDB;
     string strConexion;
     string DBFileName = "text.db";
+    public Text myText;
 
     IDbConnection dbConnection;
     IDbCommand dbCommand;
@@ -24,16 +26,38 @@ public class ConexDB : MonoBehaviour
 
     void AbrirDB()
     {
-        //crear y abrir ;a conexion
-        rutaDB = Application.dataPath + "/StreamingAssets/" + DBFileName;
+
+        //1- crear y abrir la conexion
+
+        //Compruebo que plataforma es
+        if(Application.platform == RuntimePlatform.WindowsEditor)
+        {
+           
+            rutaDB = Application.dataPath + "/StreamingAssets/" + DBFileName;
+        }
+        else if(Application.platform == RuntimePlatform.Android)
+        {
+            
+            //con persistent data el entra directamente al StreamingAssets, asi que no hay que ponerlo.
+            myText.text = "Llegue";
+            rutaDB = Application.persistentDataPath + "/" + DBFileName;
+            //comprobar si el archivo se encuentra almacenado en persistant data
+             if (!File.Exists(rutaDB))
+             {
+            StartCoroutine(CopyDBAndroid());
+               
+            }
+        }
+    
+        
         strConexion = "URI=file:" + rutaDB;
         dbConnection = new SqliteConnection(strConexion);
         dbConnection.Open();
-        //crear la consulta
+        //2- crear la consulta
         dbCommand = dbConnection.CreateCommand();
         string sqlQuery = "select * from Camisa;";
         dbCommand.CommandText = sqlQuery;
-        //leer la base de datos
+        //3- leer la base de datos
         reader = dbCommand.ExecuteReader();
         while (reader.Read())
         {
@@ -46,6 +70,7 @@ public class ConexDB : MonoBehaviour
             //cantidad
             int cantidad = reader.GetInt32(3);
             Debug.Log(id + " - " + marca + " - " + color + " - " + cantidad);
+            myText.text = id.ToString() + " - " + marca + " - " + color + " - " + cantidad.ToString();
         }
 
         //cerrar las conexiones
@@ -57,5 +82,20 @@ public class ConexDB : MonoBehaviour
         dbConnection = null;
     }
 
-    
+    IEnumerator CopyDBAndroid()
+    {
+        UnityWebRequest uwr = new UnityWebRequest("jar:file://" + Application.dataPath + "!/assets/" + DBFileName);
+        uwr.downloadHandler = new DownloadHandlerBuffer();
+
+        yield return uwr.SendWebRequest();
+
+        if (uwr.isNetworkError || uwr.isHttpError)
+        {
+            myText.text = uwr.error;
+        }
+        else
+        {
+            File.WriteAllBytes(rutaDB, uwr.downloadHandler.data);
+        }
+    }
 }
