@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Data;
 using Mono.Data.Sqlite;
@@ -26,26 +25,21 @@ public class ConexDB : MonoBehaviour
 
     void AbrirDB()
     {
-
         //1- crear y abrir la conexion
-
         //Compruebo que plataforma es
         if(Application.platform == RuntimePlatform.WindowsEditor)
-        {
-           
+        { 
             rutaDB = Application.dataPath + "/StreamingAssets/" + DBFileName;
         }
         else if(Application.platform == RuntimePlatform.Android)
-        {
-            
+        { 
             //con persistent data el entra directamente al StreamingAssets, asi que no hay que ponerlo.
             myText.text = "Llegue";
             rutaDB = Application.persistentDataPath + "/" + DBFileName;
             //comprobar si el archivo se encuentra almacenado en persistant data
              if (!File.Exists(rutaDB))
              {
-            StartCoroutine(CopyDBAndroid());
-               
+            StartCoroutine(CopyDBAndroid());   
             }
         }
     
