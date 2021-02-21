@@ -138,6 +138,7 @@ public class ConexDB : MonoBehaviour
 
 <h2>Ahora que entendemos el codigo, le dejo el codigo base organizado</h2>
 <br>
+
 ``` C#
    string strConexion;
     string DBFileName = "text.db";
