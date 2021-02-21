@@ -207,3 +207,199 @@ public class ConexDB : MonoBehaviour
     }
 ```
 
+<h2> Ahora algunos metodos para facilitar las consultas, y 3 metodos que editan el 
+    base para utilizarlos con las funciones y la CRUD, ya que no usan la lectura, mas bien usan el ExecuteScalar</h2>
+    <br>
+
+```C#
+//Consultas , estas usan los metodos base abrir, la consulta, leyendo y cerrarDB.
+
+void Comando_LIBRE(string sqlQuery)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    void Comando_SELECT(string item, 
+                        string tabla)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT " + item + 
+                          " FROM " + tabla;
+        dbCommand.CommandText = sqlQuery;
+    }
+
+
+    void Comando_WHERE(string item, 
+                       string tabla, 
+                       string campo , string comparador, string dato)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT " + item + 
+                          " FROM " + tabla + 
+                          " WHERE " + campo+ " " + comparador + " " + dato;
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    void Comando_WHERE_AND(string item,
+                           string tabla, 
+                           string campo, string comparador, string dato,
+                           string campo2, string comparador2, string dato2)
+    {
+        dbCommand = dbConnection.CreateCommand();
+       
+        string sqlQuery =   "SELECT " + item +
+                            " FROM " + tabla + 
+                            " WHERE " + campo + " " + comparador + " " + dato +
+                            " AND " + campo2 + " " + comparador2 + " " + dato2;
+        
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    void Comando_WHERE_AND_ORDERBY( string item,
+                                    string tabla,
+                                    string campo, string comparador, string dato,
+                                    string campo2, string comparador2, string dato2,
+                                    string campo3 , string orden)
+    {
+        dbCommand = dbConnection.CreateCommand();
+
+        string sqlQuery = "SELECT " + item +
+                            " FROM " + tabla +
+                            " WHERE " + campo + " " + comparador + " " + dato +
+                            " AND " + campo2 + " " + comparador2 + " " + dato2 +
+                            " ORDER BY " + campo3 + " " + orden.ToUpper();
+
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    void ComandoIN(string item,
+                   string tabla,
+                   string campo, string dato1, string dato2)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT " + item +
+                          " FROM " + tabla +
+                          " WHERE " + campo + " " +  " IN " + "(" + '"' + dato1 + '"' + "," + '"' + dato2 + '"';
+        dbCommand.CommandText = sqlQuery;
+    }
+    
+     //Like, Between , As , Limit, Left Join , Right Join , Inner Join, Is Null , etc
+     //se hacen de la misma forma
+
+```
+
+<hr>
+<h2>Ahora los metodos base editados para hacer funcional los siguientes metodos con funciones y CRUD</h2>
+<br>
+
+```C#
+//metodos creados para las funciones  y el INSERT UPDATE Y DELETE 
+//, ya que necesitan una pequena modificacion, 
+//para todos los demas los metodos base de arriba
+
+    void ContandoDB()
+    {
+        int FilaCont = Convert.ToInt32(dbCommand.ExecuteScalar());
+            try
+            {
+                Debug.Log(FilaCont);
+            }
+            catch (FormatException fe)
+            {
+                Debug.LogError(fe.Message);
+                throw;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                throw;
+            }  
+    }
+
+    void LeyendoDoubleDB()
+    {
+        double FilaCont = Convert.ToDouble(dbCommand.ExecuteScalar());
+        try
+        {
+            Debug.Log(FilaCont);
+        }
+        catch (FormatException fe)
+        {
+            Debug.LogError(fe.Message);
+            throw;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+            throw;
+        }
+    }
+
+    
+    void CerrarContador()
+    {
+        dbCommand.Dispose();
+        dbCommand = null;
+        dbConnection.Close();
+        dbConnection = null;
+    }
+```
+
+
+<hr>
+<h2>Funciones</h2>
+<br>
+
+```C#
+  //usamos cerrarcontador y contadorDB
+    void FuncCount()
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT COUNT(*) FROM customers WHERE Country = " + '"' + "Canada" + '"';
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    // aqui ccerarcontador y LeyendoDoubleDB
+    void FuncAVG()
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "SELECT AVG(Total) FROM invoices";
+        dbCommand.CommandText = sqlQuery;
+    }
+
+    // SUM , MIN , MAX , etc de la misma forma 
+```
+
+
+<hr>
+<h2>Ahora metodos para la CRUD</h2>
+<br>
+
+```C#
+    //usamos solamente cerrar contador con todo ellos junto con abrir obviamente
+    void INSERT(string dato)
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = String.Format("INSERT INTO media_types(Name) VALUES(\"{0}\")",dato);
+        dbCommand.CommandText = sqlQuery;
+        dbCommand.ExecuteScalar();
+    }
+
+    void UPDATE()
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "UPDATE media_types SET Name = \"KLWA!!\" WHERE MediaTypeId = 9" ;
+        dbCommand.CommandText = sqlQuery;
+        dbCommand.ExecuteScalar();
+    }
+
+
+    void DELETE()
+    {
+        dbCommand = dbConnection.CreateCommand();
+        string sqlQuery = "DELETE FROM media_types WHERE MediaTypeId = 8";
+        dbCommand.CommandText = sqlQuery;
+        dbCommand.ExecuteScalar();
+    }
+```
