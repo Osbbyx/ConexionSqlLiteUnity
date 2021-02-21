@@ -178,7 +178,20 @@ public class ConexDB : MonoBehaviour
         reader = dbCommand.ExecuteReader();
         while (reader.Read())
         {
-            Debug.Log(reader.GetInt32(0) + " -- " + reader.GetString(1) + " -- " + reader.GetString(2) + " -- " + reader.GetInt32(3));
+            try
+            {
+                Debug.Log(reader.GetInt32(0) + " -- " + reader.GetString(1) + " -- " + reader.GetString(2) + " -- " + reader.GetInt32(3));
+            }
+            catch (FormatException fe)
+            {
+                Debug.LogError(fe.Message);
+                continue;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+                continue;
+            }
         }
     }
 
